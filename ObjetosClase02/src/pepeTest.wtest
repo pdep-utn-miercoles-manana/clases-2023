@@ -1,0 +1,31 @@
+import pepe.*
+import categorias.*
+import resultados.*
+import presentismos.*
+
+test "El sueldo de pepe anda joya cuando es cadete con bono por presentismo nulo y bono por resultado nulo" {
+	pepe.categoria(cadete)
+	pepe.resultado(resultadoNulo)
+	pepe.presentismo(presentismoNulo)
+	pepe.cantidadDeFaltas(0)
+	
+	assert.that(pepe.sueldo() == 1500)
+}
+
+test "El sueldo de pepe anda joya cuando es cadete con bono por presentismo por faltas teniendo cero faltas y bono por resultado nulo" {
+	pepe.categoria(cadete)
+	pepe.resultado(resultadoNulo)
+	pepe.presentismo(presentismoPorFaltas)
+	pepe.cantidadDeFaltas(0)
+	
+	assert.that(pepe.sueldo() == 1600)
+}
+
+test "El sueldo de pepe anda joya cuando es cadete con bono por presentismo por faltas teniendo una falta y bono por resultado nulo" {
+	pepe.categoria(cadete)
+	pepe.resultado(resultadoNulo)
+	pepe.presentismo(presentismoPorFaltas)
+	pepe.cantidadDeFaltas(1)
+	
+	assert.equals(1550, pepe.sueldo())
+}
