@@ -1,0 +1,60 @@
+import Deposito.*
+import Formacion.*
+import Locomotora.*
+import VagonCarga.*
+import VagonPasajeros.*
+
+describe "Deposito" {
+
+	var deposito
+	var formacion1
+	var formacion2
+	var formacion3
+	var locomotora1
+	var locomotora2
+	var locomotora3
+	var vagon1
+	var vagon2
+	var vagon3
+	var vagon4
+	var vagon5
+	var vagon6
+	var vagon7
+	var vagon8
+	var vagon9
+
+	method initialize() {
+		vagon1 = new VagonPasajeros(anchoUtil = 1, largo = 11)
+		vagon2 = new VagonCarga(cargaMaxima = 11000)
+		vagon3 = new VagonPasajeros(anchoUtil = 2, largo = 12)
+		vagon4 = new VagonPasajeros(anchoUtil = 3, largo = 13)
+		vagon5 = new VagonCarga(cargaMaxima = 21000)
+		vagon6 = new VagonPasajeros(anchoUtil = 4, largo = 14)
+		vagon7 = new VagonPasajeros(anchoUtil = 5, largo = 15)
+		vagon8 = new VagonPasajeros(anchoUtil = 6, largo = 16)
+		vagon9 = new VagonCarga(cargaMaxima = 31000)
+
+		formacion1 = new Formacion(vagones = [vagon1, vagon2])
+		formacion2 = new Formacion(vagones = [vagon3, vagon4, vagon5])
+		formacion3 = new Formacion(vagones = [vagon6, vagon7, vagon8, vagon9])
+
+		locomotora1 = new Locomotora(peso = 1000, arrastreMaximo = 10000, velocidadMaxima = 110)
+		locomotora2 = new Locomotora(peso = 2000, arrastreMaximo = 20000, velocidadMaxima = 120)
+		locomotora3 = new Locomotora(peso = 3000, arrastreMaximo = 30000, velocidadMaxima = 130)
+
+		deposito = new Deposito(formaciones = [formacion1, formacion2, formacion3], locomotoras = [locomotora1, locomotora2, locomotora3])
+	}
+
+	test "Punto 10 - Vagones más pesados" {
+		assert.equals([vagon2, vagon5, vagon9], deposito.vagonesMasPesados())
+	}
+
+	test "Punto 11 - Necesita conductor experimentado" {
+		assert.that(deposito.necesitaConductorExperimentado())
+	}
+
+	test "Punto 12 - Agregar locomotora a formación" {
+		deposito.agregarLocomotoraA(formacion1)
+		assert.equals(2, deposito.locomotoras().size())
+	}
+}

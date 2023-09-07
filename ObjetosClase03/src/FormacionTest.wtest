@@ -1,0 +1,92 @@
+import Formacion.*
+import Locomotora.*
+import VagonCarga.*
+import VagonPasajeros.*
+
+describe "Formacion" {
+	
+	var formacionCompleta
+	var formacionVacia
+	var locomotora1
+	var locomotora2
+	var locomotora3
+	var vagonCarga1
+	var vagonCarga2
+	var vagonPasajeros1
+	var vagonPasajeros2
+	
+	method initialize() {
+		formacionVacia = new Formacion()
+		formacionCompleta = new Formacion()
+		
+		locomotora1 = new Locomotora(peso = 1000, arrastreMaximo = 12000, velocidadMaxima = 80)
+		locomotora2 = new Locomotora(peso = 1500, arrastreMaximo = 15000, velocidadMaxima = 60)
+		locomotora3 = new Locomotora(peso = 2500, arrastreMaximo = 10000, velocidadMaxima = 50)
+
+		vagonCarga1 = new VagonCarga(cargaMaxima = 1200)
+		vagonCarga2 = new VagonCarga(cargaMaxima = 1500)
+		
+		vagonPasajeros1 = new VagonPasajeros(largo = 10, anchoUtil = 2) 
+		vagonPasajeros2 = new VagonPasajeros(largo = 10, anchoUtil = 3)
+		
+		formacionCompleta.agregarVagon(vagonCarga1)
+		formacionCompleta.agregarVagon(vagonCarga2)		
+		formacionCompleta.agregarVagon(vagonPasajeros1)
+		formacionCompleta.agregarVagon(vagonPasajeros2)
+		formacionCompleta.agregarLocomotora(locomotora1)
+		formacionCompleta.agregarLocomotora(locomotora2)
+	}
+	
+	test "Punto 1 - Agregar vagón de carga" {
+		formacionVacia.agregarVagon(vagonCarga1)
+		assert.equals([vagonCarga1], formacionVacia.vagones())
+	}
+	
+	test "Punto 1 - Agregar vagón de pasajeros" {
+		formacionVacia.agregarVagon(vagonPasajeros1)
+		assert.equals([vagonPasajeros1], formacionVacia.vagones())
+	}
+	
+	test "Punto 2 - Agregar locomotora" {
+		formacionVacia.agregarLocomotora(locomotora1)
+		assert.equals([locomotora1], formacionVacia.locomotoras())
+	
+	}
+	test "Punto 3 - Cantidad de vagones" {
+		assert.equals(4, formacionCompleta.cantidadVagones())
+	}
+	
+	test "Punto 4 - Total de pasajeros" {
+		assert.equals(180, formacionCompleta.totalPasajeros())
+	}
+	
+	test "Punto 5 - Cantidad de vagones livianos" {
+		assert.equals(2, formacionCompleta.cantidadVagonesLivianos())
+	}
+	
+	test "Punto 6 - Velocidad máxima" {
+		assert.equals(60, formacionCompleta.velocidadMaxima())
+	}
+	
+	test "Punto 7 - Es eficiente" {
+		assert.that(formacionCompleta.esEficiente())
+	}
+
+	test "Punto 7 - No es eficiente" {
+		formacionVacia.agregarLocomotora(locomotora3)
+		assert.notThat(formacionVacia.esEficiente())
+	}
+	
+	test "Punto 8 - Puede moverse" {
+		assert.that(formacionVacia.puedeMoverse())
+	}
+	
+	test "Punto 8 - No puede moverse" {
+		formacionVacia.agregarVagon(vagonCarga1)
+		assert.notThat(formacionVacia.puedeMoverse())
+	}
+	
+	test "Punto 9 - Kilos de empuje faltante" {
+		assert.equals(7080, formacionCompleta.kilosDeEmpujeFaltante())
+	}
+}
