@@ -1,0 +1,279 @@
+import Medico.*
+import Persona.*
+import Enfermedad.*
+import Excepciones.*
+import FactorSanguineo.*
+import JefeDeDepartamento.*
+import EnfermedadInfecciosa.*
+import EnfermedadAutoinmune.*
+
+const frank = new Persona(cantidadCelulas = 3500000, temperatura = 36, factorSanguineo = factorO)
+const logan = new Persona(cantidadCelulas = 3000000, temperatura = 36, factorSanguineo = factorR)
+        
+const lupus = new EnfermedadAutoinmune(cantidadCelulasAmenazadas = 10000)
+const otitis = new EnfermedadInfecciosa(cantidadCelulasAmenazadas = 100)
+const malaria500 = new EnfermedadInfecciosa(cantidadCelulasAmenazadas = 500)
+const malaria800 = new EnfermedadInfecciosa(cantidadCelulasAmenazadas = 800)
+
+const house = new JefeDeDepartamento(cantidadCelulas = 3000000, temperatura = 36, factorSanguineo = factorO)
+const cameron = new Medico(cantidadCelulas = 3000000, temperatura = 36, dosis = 10, factorSanguineo = factorA)
+const foreman = new Medico(cantidadCelulas = 3000000, temperatura = 36, dosis = 10, factorSanguineo = factorR)
+
+describe "Dr. Casa - Temporada 1" {
+
+    method initialize() {       
+        logan.contraer(lupus)
+        logan.contraer(otitis)
+        logan.contraer(malaria500)
+    }
+
+    test "Punto 1 - Frank nace sin malaria" {
+        assert.notThat(frank.tiene(malaria800))
+    }
+
+    test "Punto 1 - Frank contrae malaria de 800 celulas" {
+        frank.contraer(malaria800)
+        assert.that(frank.tiene(malaria800))
+    }
+
+    test "Punto 2 - La malaria se reproduce" {
+        malaria500.reproducirse()
+        assert.equals(1000, malaria500.cantidadCelulasAmenazadas())
+    }
+
+    test "Punto 3a - El lupus es la enfermedad que más celulas afecta a Logan luego de vivir un día" {
+        logan.vivirUnDia()
+        
+        assert.equals(lupus, logan.enfermedadMasAmenazante())
+    }
+
+    test "Punto 3b - Logan no está en coma luego de vivir un día" {
+        logan.vivirUnDia()
+
+        assert.notThat(logan.estaEnComa())
+    }
+
+    test "Punto 3b - Una persona con 45 grados de temperatura está en coma" {
+        assert.that(new Persona(temperatura = 45, cantidadCelulas = 4000000, factorSanguineo = factorO).estaEnComa())
+    }
+
+    test "Punto 3b - Una persona con pocas células está en coma" {
+        assert.that(new Persona(temperatura = 36, cantidadCelulas = 999999, factorSanguineo = factorO).estaEnComa())
+    }
+
+    test "Punto 3c - Cantidad de celulas amenazadas por enfermedades agresivas de Logan luego de vivir un día" {
+        logan.vivirUnDia()
+
+        assert.equals(0, logan.cantidadCelulasAmenazadasPorEnfermedadesAgresivas())
+    }
+
+    test "Punto 4a - El lupus es la enfermedad que más celulas afecta a Logan luego de vivir 31 días" {
+        logan.vivirDias(31)
+
+        assert.equals(lupus, logan.enfermedadMasAmenazante())
+    }
+
+    test "Punto 4b - Logan no está en coma luego de vivir 31 días" {
+        logan.vivirDias(31)
+
+        assert.that(logan.estaEnComa())
+    }
+
+    test "Punto 4c - Cantidad de celulas amenazadas por enfermedades agresivas de Logan luego de vivir 31 días" {
+        logan.vivirDias(31)
+
+        assert.equals(10000, logan.cantidadCelulasAmenazadasPorEnfermedadesAgresivas())
+    }
+
+}
+
+describe "Dr. Casa - Temporada 2" {
+
+    method initialize() {
+        logan.contraer(lupus)
+        logan.contraer(otitis)
+        logan.contraer(malaria500)
+        
+        house.subordinarA(cameron)
+    }
+
+    test "Punto 1 - La malaria se atenua 100 celulas" {
+        malaria500.atenuarseEn(100)
+        assert.equals(400, malaria500.cantidadCelulasAmenazadas())
+    }
+
+    test "Punto 1 - El lupus se atenua 500 celulas" {
+        lupus.atenuarseEn(500)
+        assert.equals(9500, lupus.cantidadCelulasAmenazadas())
+    }
+
+    test "Punto 2 - Cameron atiende a Logan y lo cura de la otitis" {
+        cameron.atenderA(logan)
+        assert.notThat(logan.tiene(otitis))
+    }
+
+    test "Punto 2 - Cameron atiende a Logan y lo atenua la malaria" {
+        cameron.atenderA(logan)
+        assert.equals(350, malaria500.cantidadCelulasAmenazadas())
+    }
+
+    test "Punto 2 - Cameron atiende a Logan y lo atenua el lupus" {
+        cameron.atenderA(logan)
+        assert.equals(9850, lupus.cantidadCelulasAmenazadas())
+    }
+
+    test "Punto 3 - House atiende a Logan y lo cura de la otitis" {
+        house.atenderA(logan)
+        assert.notThat(logan.tiene(otitis))
+    }
+
+    test "Punto 3 - House  atiende a Logan y lo atenua la malaria" {
+        house.atenderA(logan)
+        assert.equals(350, malaria500.cantidadCelulasAmenazadas())
+    }
+
+    test "Punto 3 - House atiende a Logan y lo atenua el lupus" {
+        house.atenderA(logan)
+        assert.equals(9850, lupus.cantidadCelulasAmenazadas())
+    }
+
+    test "Punto 4 - Cameron contrae malaria y se auto-atiende" {
+        cameron.contraer(malaria500)
+        assert.equals(350, malaria500.cantidadCelulasAmenazadas())
+    }
+
+    test "Punto 4 - House contrae malaria y se auto-atiende" {
+        house.contraer(malaria500)
+        assert.equals(350, malaria500.cantidadCelulasAmenazadas())
+    }
+
+    test "Punto 5 - House contrae la muerte" {
+        house.contraer(muerte)
+        house.vivirUnDia()
+        assert.equals(0, house.temperatura())
+    }
+}
+
+describe "Dr. Casa - Temporada 3" {
+	
+	test "Punto 1 - Cameron intenta donarle a House y no puede porque son incompatibles" {
+        assert.throwsExceptionWithType(incompatibleException, { cameron.intentarDonarA(house, 1100) })
+	}
+	
+	test "Punto 2 - Logan intenta donarle a Foreman y no falla" {
+        assert.doesNotThrowException { logan.intentarDonarA(foreman, 750000) }
+	}
+	
+	test "Punto 2 - Logan logra donarle a Foreman y pierde células" {
+		logan.intentarDonarA(foreman, 750000)
+        assert.equals(2250000, logan.cantidadCelulas())
+	}
+
+	test "Punto 2 - Foreman recibe una donacion de Logan y gana células" {
+		logan.intentarDonarA(foreman, 750000)
+        assert.equals(3750000, foreman.cantidadCelulas())
+	}
+	
+	test "Punto 3 - Foreman le intenta donar a cámeron más de lo que puede y falla" {
+		assert.throwsExceptionWithType(celulasInsuficientesException, { foreman.intentarDonarA(cameron, 750001) })
+	}
+}
+
+
+describe "Compatibilidad sanguinea real" {
+	test "O- puede donarle a todos" {
+		assert.that(grupoONegativo.puedeDonarA(grupoONegativo))
+		assert.that(grupoONegativo.puedeDonarA(grupoANegativo))
+		assert.that(grupoONegativo.puedeDonarA(grupoBNegativo))
+		assert.that(grupoONegativo.puedeDonarA(grupoABNegativo))
+
+		assert.that(grupoONegativo.puedeDonarA(grupoOPositivo))
+		assert.that(grupoONegativo.puedeDonarA(grupoAPositivo))
+		assert.that(grupoONegativo.puedeDonarA(grupoBPositivo))
+		assert.that(grupoONegativo.puedeDonarA(grupoABPositivo))
+	}	
+
+	test "O+ puede donarle a todos los positivos" {
+		assert.notThat(grupoOPositivo.puedeDonarA(grupoONegativo))
+		assert.notThat(grupoOPositivo.puedeDonarA(grupoANegativo))
+		assert.notThat(grupoOPositivo.puedeDonarA(grupoBNegativo))
+		assert.notThat(grupoOPositivo.puedeDonarA(grupoABNegativo))
+
+		assert.that(grupoOPositivo.puedeDonarA(grupoOPositivo))
+		assert.that(grupoOPositivo.puedeDonarA(grupoAPositivo))
+		assert.that(grupoOPositivo.puedeDonarA(grupoBPositivo))
+		assert.that(grupoOPositivo.puedeDonarA(grupoABPositivo))
+	}	
+
+	test "A- puede donarle a los A-, A+, AB- y AB+" {
+		assert.notThat(grupoANegativo.puedeDonarA(grupoONegativo))
+		assert.notThat(grupoANegativo.puedeDonarA(grupoOPositivo))
+		assert.notThat(grupoANegativo.puedeDonarA(grupoBNegativo))
+		assert.notThat(grupoANegativo.puedeDonarA(grupoBPositivo))
+
+		assert.that(grupoANegativo.puedeDonarA(grupoAPositivo))
+		assert.that(grupoANegativo.puedeDonarA(grupoANegativo))
+		assert.that(grupoANegativo.puedeDonarA(grupoABNegativo))
+		assert.that(grupoANegativo.puedeDonarA(grupoABPositivo))
+	}	
+
+	test "A+ puede donarle a los A+ y AB+" {
+		assert.notThat(grupoAPositivo.puedeDonarA(grupoONegativo))
+		assert.notThat(grupoAPositivo.puedeDonarA(grupoOPositivo))
+		assert.notThat(grupoAPositivo.puedeDonarA(grupoBNegativo))
+		assert.notThat(grupoAPositivo.puedeDonarA(grupoBPositivo))
+		assert.notThat(grupoAPositivo.puedeDonarA(grupoANegativo))
+		assert.notThat(grupoAPositivo.puedeDonarA(grupoABNegativo))
+
+		assert.that(grupoAPositivo.puedeDonarA(grupoAPositivo))
+		assert.that(grupoAPositivo.puedeDonarA(grupoABPositivo))
+	}	
+
+	test "B- puede donarle a los B-, B+, AB- y AB+" {
+		assert.notThat(grupoBNegativo.puedeDonarA(grupoONegativo))
+		assert.notThat(grupoBNegativo.puedeDonarA(grupoOPositivo))
+		assert.notThat(grupoBNegativo.puedeDonarA(grupoANegativo))
+		assert.notThat(grupoBNegativo.puedeDonarA(grupoAPositivo))
+
+		assert.that(grupoBNegativo.puedeDonarA(grupoBPositivo))
+		assert.that(grupoBNegativo.puedeDonarA(grupoBNegativo))
+		assert.that(grupoBNegativo.puedeDonarA(grupoABNegativo))
+		assert.that(grupoBNegativo.puedeDonarA(grupoABPositivo))
+	}	
+
+	test "B+ puede donarle a los B+ y AB+" {
+		assert.notThat(grupoBPositivo.puedeDonarA(grupoONegativo))
+		assert.notThat(grupoBPositivo.puedeDonarA(grupoOPositivo))
+		assert.notThat(grupoBPositivo.puedeDonarA(grupoAPositivo))
+		assert.notThat(grupoBPositivo.puedeDonarA(grupoANegativo))
+		assert.notThat(grupoBPositivo.puedeDonarA(grupoBNegativo))
+		assert.notThat(grupoBPositivo.puedeDonarA(grupoABNegativo))
+
+		assert.that(grupoBPositivo.puedeDonarA(grupoBPositivo))
+		assert.that(grupoBPositivo.puedeDonarA(grupoABPositivo))
+	}	
+
+	test "AB- puede donarle a los AB- y AB+" {
+		assert.notThat(grupoABNegativo.puedeDonarA(grupoONegativo))
+		assert.notThat(grupoABNegativo.puedeDonarA(grupoOPositivo))
+		assert.notThat(grupoABNegativo.puedeDonarA(grupoANegativo))
+		assert.notThat(grupoABNegativo.puedeDonarA(grupoAPositivo))
+		assert.notThat(grupoABNegativo.puedeDonarA(grupoBPositivo))
+		assert.notThat(grupoABNegativo.puedeDonarA(grupoBNegativo))
+
+		assert.that(grupoABNegativo.puedeDonarA(grupoABNegativo))
+		assert.that(grupoABNegativo.puedeDonarA(grupoABPositivo))
+	}	
+
+	test "AB+ puede donarle solamente a AB+" {
+		assert.notThat(grupoABPositivo.puedeDonarA(grupoONegativo))
+		assert.notThat(grupoABPositivo.puedeDonarA(grupoOPositivo))
+		assert.notThat(grupoABPositivo.puedeDonarA(grupoAPositivo))
+		assert.notThat(grupoABPositivo.puedeDonarA(grupoANegativo))
+		assert.notThat(grupoABPositivo.puedeDonarA(grupoBNegativo))
+		assert.notThat(grupoABPositivo.puedeDonarA(grupoBPositivo))
+		assert.notThat(grupoABPositivo.puedeDonarA(grupoABNegativo))
+
+		assert.that(grupoABPositivo.puedeDonarA(grupoABPositivo))
+	}	
+}
